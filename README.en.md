@@ -34,6 +34,53 @@ poetry run testsight --diff-mode range --base origin/main --head HEAD
 poetry run testsight --test-command "tox -e py310 --"
 ```
 
+## 🧩 Adding to your project
+1. **Install the dependency.**
+   - PyPI (after release): `poetry add testsight` or `pip install testsight`.
+   - Direct from Git:  
+     ```bash
+     poetry add --git https://github.com/loobinsk/testsight.git
+     # or: pip install git+https://github.com/loobinsk/testsight.git
+     ```
+2. **Create a config.** Drop `testsight.toml` in the repo root or extend `pyproject.toml`:
+   ```toml
+   [tool.testsight]
+   test-command = "pytest -q --maxfail=1"
+   dry-run = false
+
+   [tool.testsight.diff]
+   mode = "staged"
+   include-untracked = true
+   ```
+3. **Run Testsight:** `poetry run testsight` (or `testsight` inside your venv).
+
+### 🔁 Pre-commit integration
+Wire Testsight into commit hooks so impacted tests run before every commit:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: testsight
+        name: testsight (impacted tests)
+        entry: poetry run testsight
+        language: system
+        pass_filenames: false
+```
+
+> Keep `dry-run` enabled if you only want a reminder without executing tests.
+
+### 🤖 CI usage
+```yaml
+# GitHub Actions
+- name: Impacted tests
+  run: |
+    poetry install
+    poetry run testsight --json > impacted.json
+    jq '.[]' impacted.json
+```
+
 ## ⚙️ Configuration
 Testsight looks for `testsight.toml`, `.testsightrc` or `[tool.testsight]` within `pyproject.toml`. Every option has a CLI/env override (`TESTSIGHT_*`).
 

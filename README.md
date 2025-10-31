@@ -34,6 +34,53 @@ poetry run testsight --diff-mode range --base main --head HEAD
 poetry run testsight --test-command "tox -e py310 --"
 ```
 
+## 🧩 Интеграция в ваш проект
+1. **Добавьте зависимость.**
+   - PyPI (после релиза): `poetry add testsight` или `pip install testsight`.
+   - Прямо из репозитория:  
+     ```bash
+     poetry add --git https://github.com/loobinsk/testsight.git
+     # или pip install git+https://github.com/loobinsk/testsight.git
+     ```
+2. **Создайте конфиг.** В корне проекта положите `testsight.toml` или добавьте секцию в `pyproject.toml`:
+   ```toml
+   [tool.testsight]
+   test-command = "pytest -q --maxfail=1"
+   dry-run = false
+
+   [tool.testsight.diff]
+   mode = "staged"
+   include-untracked = true
+   ```
+3. **Запускайте Testsight:** `poetry run testsight` (или `testsight` из вашего виртуального окружения).
+
+### 🔁 Использование в pre-commit
+Добавьте хуки, чтобы блокировать коммиты без прогонов релевантных тестов:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: testsight
+        name: testsight (impacted tests)
+        entry: poetry run testsight
+        language: system
+        pass_filenames: false
+```
+
+> Хук распечатает список затронутых тестов и запустит ваш `test-command`. Можно оставить `dry-run`, если хотите просто подсказку без запуска.
+
+### 🤖 Интеграция в CI
+```yaml
+# GitHub Actions
+- name: Impacted tests
+  run: |
+    poetry install
+    poetry run testsight --json > impacted.json
+    jq '.[]' impacted.json
+```
+
 ## ⚙️ Конфигурация
 Testsight ищет настройки в `testsight.toml`, `.testsightrc` или `pyproject.toml` (`[tool.testsight]`). Всё можно переопределить из CLI или переменных окружения (`TESTSIGHT_*`).
 
