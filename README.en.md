@@ -113,6 +113,12 @@ stopwords = ["common", "shared"]
 
 Async IO isn’t used on purpose: building the graph is CPU-bound and runs once per invocation, so asyncio would add complexity without measurable wins.
 
+## ⚠️ Limitations & tips
+- The analysis relies on static imports; dynamically loaded tests or modules might be missed. Tune `testsight.tokens` and keep test files in predictable locations.
+- Only files visible in `git diff` (or explicitly passed on CLI) are considered. Remember to `git add` staged changes and pick the correct `diff.mode`.
+- Misconfigured naming rules shrink coverage. Extend the `naming` section with your prefixes/directories if your layout differs from defaults.
+- Keep a safety net for high-risk changes (e.g. nightly full suite) and treat Testsight as a feedback accelerator rather than a total replacement for your test matrix.
+
 ## 🧪 Tests & demos
 Twenty pytest cases live under `tests/`; they create temporary repos, run `git add/commit`, call the CLI and verify outcomes. Perfect for documentation and regression coverage.
 
